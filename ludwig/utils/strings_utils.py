@@ -970,6 +970,6 @@ tokenizer_registry = {
     'multi_lemmatize': MultiLemmatizeTokenizer,
     'multi_lemmatize_filter': MultiLemmatizeFilterTokenizer,
     'multi_lemmatize_remove_stopwords': MultiLemmatizeRemoveStopwordsTokenizer,
-    'bert': BERTTokenizer
+    'bert': BERTTokenizer,
     'konlpy':KoreanTokenizer
 }
