@@ -536,7 +536,33 @@ class FrenchLemmatizeRemoveStopwordsTokenizer(BaseTokenizer):
             filter_stopwords=True
         )
 
+class KoreanTokenizer(BaseTokenizer):
 
+    def __init__(self, vocab_file=None, **kwargs):
+
+        try:
+
+            from konlpy.tag import Komuran
+
+        except ImportError:
+
+            raise ValueError(
+
+                "Please install konlpy: pip install konlpy"
+
+                )
+
+        self.tokenizer = Komuran()
+
+
+ 
+
+    def __call__(self, text):
+
+        return list(map(lambda mm: mm[0]+'_'+mm[1], self.tokenizer.pos(text)))
+
+
+ 
 class PortugueseTokenizer(BaseTokenizer):
     def __call__(self, text):
         return process_text(text, load_nlp_pipeline('pt'))
@@ -945,4 +971,5 @@ tokenizer_registry = {
     'multi_lemmatize_filter': MultiLemmatizeFilterTokenizer,
     'multi_lemmatize_remove_stopwords': MultiLemmatizeRemoveStopwordsTokenizer,
     'bert': BERTTokenizer
+    'konlpy':KoreanTokenizer
 }
