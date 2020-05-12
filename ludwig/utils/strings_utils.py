@@ -542,7 +542,7 @@ class KoreanTokenizer(BaseTokenizer):
 
         try:
 
-            from konlpy.tag import Komuran
+            from konlpy.tag import Komoran
 
         except ImportError:
 
@@ -552,7 +552,7 @@ class KoreanTokenizer(BaseTokenizer):
 
                 )
 
-        self.tokenizer = Komuran()
+        self.tokenizer = Komoran()
 
 
  
