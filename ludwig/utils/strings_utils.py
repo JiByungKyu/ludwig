@@ -539,32 +539,19 @@ class FrenchLemmatizeRemoveStopwordsTokenizer(BaseTokenizer):
         )
 
 class KoreanTokenizer(BaseTokenizer):
-
     def __init__(self, vocab_file=None, **kwargs):
-
         try:
-
             from konlpy.tag import Komoran
-
         except ImportError:
-
             raise ValueError(
-
                 "Please install konlpy: pip install konlpy"
-
                 )
-
-        self.tokenizer = Komoran()
-
-
- 
+        self.tokenizer = Komoran() 
 
     def __call__(self, text):
+        return list(map(lambda mm: mm[0]+'_'+mm[1], self.tokenizer.pos(text.replace('\n',' '))))
 
-        return list(map(lambda mm: mm[0]+'_'+mm[1], self.tokenizer.pos(text)))
 
-
- 
 class PortugueseTokenizer(BaseTokenizer):
     def __call__(self, text):
         return process_text(text, load_nlp_pipeline('pt'))
