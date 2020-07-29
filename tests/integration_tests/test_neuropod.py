@@ -22,26 +22,39 @@ import pandas as pd
 
 from ludwig.api import LudwigModel
 from ludwig.constants import BINARY, SEQUENCE, TEXT, SET
-from ludwig.neuropod import export_neuropod
+from ludwig.utils.neuropod_utils import export_neuropod
 from ludwig.utils.strings_utils import str2bool
 from tests.integration_tests.utils import category_feature, binary_feature, \
-    numerical_feature, text_feature, set_feature, vector_feature
+    numerical_feature, text_feature, set_feature, vector_feature, \
+    image_feature, \
+    audio_feature, timeseries_feature, date_feature, h3_feature, bag_feature
 from tests.integration_tests.utils import generate_data
 from tests.integration_tests.utils import sequence_feature
 
 
-def test_neuropod(csv_filename):
+def _test_neuropod(csv_filename):
     #######
     # Setup
     #######
     dir_path = os.path.dirname(csv_filename)
+    image_dest_folder = os.path.join(os.getcwd(), 'generated_images')
+    audio_dest_folder = os.path.join(os.getcwd(), 'generated_audio')
 
-    output_feature_options = []
-
-    # Single sequence input, multiple outputs
-    sf = sequence_feature()
-    input_features = [sf]
-    input_feature_name = input_features[0]['name']
+    input_features = [
+        binary_feature(),
+        numerical_feature(),
+        category_feature(vocab_size=3),
+        sequence_feature(vocab_size=3),
+        text_feature(vocab_size=3),
+        vector_feature(),
+        image_feature(image_dest_folder),
+        audio_feature(audio_dest_folder),
+        timeseries_feature(),
+        date_feature(),
+        h3_feature(),
+        set_feature(vocab_size=3),
+        bag_feature(vocab_size=3),
+    ]
 
     output_features = [
         binary_feature(),
@@ -93,18 +106,27 @@ def test_neuropod(csv_filename):
     # predict using neuropod
     ########################
     data_df = pd.read_csv(data_csv_path)
-    if_vals = data_df[input_feature_name].tolist()
+    if_dict = {
+        input_feature['name']: np.expand_dims(np.array(
+            [str(x) for x in data_df[input_feature['name']].tolist()],
+            dtype='str'
+        ), 1)
+        for input_feature in input_features
+    }
 
     from neuropod.loader import load_neuropod
     neuropod_model = load_neuropod(neuropod_path)
-    preds = neuropod_model.infer(
-        {input_feature_name: np.array(if_vals, dtype='str')}
-    )
+    preds = neuropod_model.infer(if_dict)
+
+    for key in preds:
+        preds[key] = np.squeeze(preds[key])
 
     #########
     # cleanup
     #########
-    for path in [ludwigmodel_path, neuropod_path]:
+    # Delete the temporary data created
+    for path in [ludwigmodel_path, neuropod_path,
+                 image_dest_folder, audio_dest_folder]:
         if os.path.exists(path):
             if os.path.isfile(path):
                 os.remove(path)
